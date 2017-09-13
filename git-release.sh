@@ -39,7 +39,7 @@ function _help () {
     echo ""
 
     echo "  issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,"
-    echo "          and good practices/conventions. For now it's hardcoded to find string started with 'tkt[^: -')]+', but it will configurable. It uses"
+    echo "          and good practices/conventions. For now it's hardcoded to find string started with 'tkt[0-9]+', but it will configurable. It uses"
     echo "          two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag. "
     echo "      point_a (defaults to branch 'develop'): point of the search range."
     echo "      point_b (defaults to the output of 'version' command): point of the search range."
@@ -107,7 +107,7 @@ function issues () {
   	echo
   fi
 
-  git log $POINT_B..$POINT_A --format=oneline | grep -Eio "tkt[^: -')]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
+  git log $POINT_B..$POINT_A --format=oneline | grep -Eio "tkt[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
 
 function version () {
