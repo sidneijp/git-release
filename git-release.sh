@@ -3,7 +3,7 @@
 # git-release.sh
 # Simple utility to create release based on git and git-flow.
 #
-# - generate version number based on Semantic Versioning (MAJOR.MINOR.MAINTENANCE, eg. 1.0.0)
+# - generate version number based on Semantic Versioning (MAJOR.MINOR.PATCH, eg. 1.0.0)
 # - list versions
 # - list issues for release (based on name convetion on branches and headline commit message)
 
@@ -26,10 +26,10 @@ function _help () {
     echo ""
 
     echo "  next [kind]: generate next release version. It result depends on the kind."
-    echo "      kind: the kind of release. As in Semantic Version (major.minor.maintenance) it may be."
+    echo "      kind: the kind of release. As in Semantic Version (major.minor.patch) it may be."
     echo "          major: version when they make incompatible API changes. "
     echo "          minor (default): version when they add functionality in a backwards-compatible manner."
-    echo "          maintenance: version when they make backwards-compatible bug fixes."
+    echo "          patch: version when they make backwards-compatible bug fixes."
     echo ""
 
     echo "  create [kind|version]: create the new release depending on kind or version. Options for 'kind' are"
@@ -60,11 +60,11 @@ function next () {
 	VERSION=`version`
 	KIND=${1:-minor}
 
-	# major, minor, maintenance
+	# major, minor, patch
 	IFS='.' read -r -a splitVersion <<< "$VERSION"
 	version_length=${#splitVersion[@]} # array length
 
-	if [ "$KIND" == "maintenance" ]; then
+	if [ "$KIND" == "patch" ]; then
 		if [ "$version_length" == 3 ]; then
 			new_version="${splitVersion[0]}""."
 			new_version="$new_version""${splitVersion[1]}""."
@@ -128,7 +128,7 @@ function prepare () {
 function create () {
 	VERSION=${1:-minor}
 
-	if [ "$VERSION" == "maintenance" ] || [ "$VERSION" == "minor" ] || [ "$VERSION" == "major" ]; then
+	if [ "$VERSION" == "patch" ] || [ "$VERSION" == "minor" ] || [ "$VERSION" == "major" ]; then
 		VERSION=`next "$1"`
 	fi
 
