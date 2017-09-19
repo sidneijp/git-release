@@ -18,11 +18,11 @@ function _help () {
     echo "  prepare: show this message."
     echo ""
 
-    echo "  version: show actual release version."
+    echo "  version [amount]: show released versions."
+    echo "          amount (defaults to:1): the number of previous version to show."
     echo ""
 
-    echo "  previous [amount]: show previous releases version."
-    echo "          amount (defaults to:1): the number of previous version to show."
+    echo "  previous : show previous release version."
     echo ""
 
     echo "  next [kind]: generate next release version. It result depends on the kind."
@@ -103,9 +103,9 @@ function issues () {
   	POINT_A=`previous "$BACKWARD"`
   	let BACKWARD="$BACKWARD"+1
   	POINT_B=`previous "$BACKWARD"`
-  	echo "$POINT_B""/""$POINT_A"
-  	echo
   fi
+  echo $POINT_A/$POINT_B
+  echo
 
   git log $POINT_B..$POINT_A --format=oneline | grep -Eio "tkt[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
@@ -135,9 +135,6 @@ function create () {
 	echo "Create release version:" $VERSION
 	git flow release start $VERSION
 	git flow release finish $VERSION
-
-  	echo "Review the release then execute:"
-    echo "git-release send"
 }
 
 function send () {
@@ -148,6 +145,14 @@ function send () {
 	git checkout $DEVELOP && git pull $REMOTE $DEVELOP && git push $REMOTE $DEVELOP
 	git checkout $MASTER && git pull $REMOTE $MASTER && git push $REMOTE --tags && git push $REMOTE $MASTER
 	git checkout $DEVELOP
+}
+
+function deploy() {
+	VERSION=${1:-minor}
+    prepare
+    issues
+    create $VERSION
+    send
 }
 
 # Execute command + parameters
