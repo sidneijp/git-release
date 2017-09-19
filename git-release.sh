@@ -8,45 +8,36 @@
 # - list issues for release (based on name convetion on branches and headline commit message)
 
 function _help () {
-    echo "git-release.sh <command>"
-    echo ""
+    echo "git-release.sh <command>
 
-    echo "Commands:"
-    echo "  help: show this message."
-    echo ""
+    Commands:
+      help: show this message.
 
-    echo "  prepare: show this message."
-    echo ""
+      prepare: show this message.
 
-    echo "  version [amount]: show released versions."
-    echo "          amount (defaults to:1): the number of previous version to show."
-    echo ""
+      version [amount]: show released versions.
+              amount (defaults to:1): the number of previous version to show.
 
-    echo "  previous : show previous release version."
-    echo ""
+      previous : show previous release version.
 
-    echo "  next [kind]: generate next release version. It result depends on the kind."
-    echo "      kind: the kind of release. As in Semantic Version (major.minor.patch) it may be."
-    echo "          major: version when they make incompatible API changes. "
-    echo "          minor (default): version when they add functionality in a backwards-compatible manner."
-    echo "          patch: version when they make backwards-compatible bug fixes."
-    echo ""
+      next [kind]: generate next release version. It result depends on the kind.
+          kind: the kind of release. As in Semantic Version (major.minor.patch) it may be.
+              major: version when they make incompatible API changes.
+              minor (default): version when they add functionality in a backwards-compatible manner.
+              patch: version when they make backwards-compatible bug fixes.
 
-    echo "  create [kind|version]: create the new release depending on kind or version. Options for 'kind' are"
-    echo "          the as fot 'next' command. When using 'version' instead, it's accepts any string, but if it is something"
-    echo "          different from Semant Versioning scheme, the other commands will not work properly. If no option is passed"
-    echo "          it uses 'kind' with its default value."
-    echo ""
+      create [kind|version]: create the new release depending on kind or version. Options for 'kind' are
+              the as fot 'next' command. When using 'version' instead, it's accepts any string, but if it is something
+              different from Semant Versioning scheme, the other commands will not work properly. If no option is passed
+              it uses 'kind' with its default value.
 
-    echo "  issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,"
-    echo "          and good practices/conventions. For now it's hardcoded to find string started with 'tkt[0-9]+', but it will configurable. It uses"
-    echo "          two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag. "
-    echo "      point_a (defaults to branch 'develop'): point of the search range."
-    echo "      point_b (defaults to the output of 'version' command): point of the search range."
-    echo ""
+      issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,
+              and good practices/conventions. For now it's hardcoded to find string started with 'tkt[0-9]+', but it will configurable. It uses
+              two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag.
+          point_a (defaults to branch 'develop'): point of the search range.
+          point_b (defaults to the output of 'version' command): point of the search range.
 
-    echo "  send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'."
-    echo ""
+      send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'."
 }
 
 function previous () {
