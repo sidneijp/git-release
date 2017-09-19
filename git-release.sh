@@ -26,16 +26,20 @@ function _help () {
               minor (default): version when they add functionality in a backwards-compatible manner.
               patch: version when they make backwards-compatible bug fixes.
 
-      create [kind|version]: create the new release depending on kind or version. Options for 'kind' are
-              the as fot 'next' command. When using 'version' instead, it's accepts any string, but if it is something
-              different from Semant Versioning scheme, the other commands will not work properly. If no option is passed
-              it uses 'kind' with its default value.
+      create [kind|version]: create the new release depending on kind or version.
+          kind|version: are the same as those for 'next' command. When using 'version' instead, it's accepts any string, but if it is something
+              different from Semant Versioning scheme, the other commands will not work properly. If no option is passed it uses 'kind'
+              with its default value.
 
       issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,
               and good practices/conventions. For now it's hardcoded to find string started with 'tkt[0-9]+', but it will configurable. It uses
               two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag.
           point_a (defaults to branch 'develop'): point of the search range.
           point_b (defaults to the output of 'version' command): point of the search range.
+
+      deploy [kind|version] [--send]: executes 'prepare', then 'issues', then 'create [kind|version]' and optionally 'send' after all.
+          kind|version: options are the same as those for 'create'. Actually, it'll simple bypass for 'create' command.
+          --send: use this flag to execute 'send' command after all to push thing to remote.
 
       send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'."
 }
@@ -139,11 +143,12 @@ function send () {
 }
 
 function deploy() {
-	VERSION=${1:-minor}
     prepare
     issues
-    create $VERSION
-    send
+    create $1
+    if [ "$2" == "--send" ]; then
+        send
+    fi
 }
 
 # Execute command + parameters
