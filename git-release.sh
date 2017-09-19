@@ -152,7 +152,7 @@ function deploy() {
 }
 
 # Execute command + parameters
-COMMAND="$1"
+COMMAND=${1:-help}
 if [ "$COMMAND" == "help" ]; then
     COMMAND="_help"
 fi
