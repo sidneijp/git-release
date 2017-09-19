@@ -8,7 +8,68 @@
 # - list issues for release (based on name convetion on branches and headline commit message)
 
 function _help () {
-    echo "git-release.sh <command>
+    echo "
+
+    Usage examples:
+
+        user@host ~ $ git-release.sh prepare # updates branches 'master' and 'develop' (with 'git pull')
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        user@host ~ $ git-release.sh create # create next release based on current version. When no current version, uses 0.0.0
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        0.0.0
+        user@host ~ $ git-release.sh previous # show the last version (one before the last released) if exists
+        user@host ~ $ git-release.sh next # calculates (no paramater change 'minor') and show the next release number
+        0.1.0
+        user@host ~ $ git-release.sh next minor# calculates (explicit 'minor') and show the next release number
+        0.1.0
+        user@host ~ $ git-release.sh next major # calculates ('major') and show the next release number
+        1.0.0
+        user@host ~ $ git-release.sh next patch # calculates ('patch') and show the next release number
+        0.0.1
+        user@host ~ $ git-release.sh version 5 # show the 5 versions last released versions if exist
+        0.0.0
+        user@host ~ $ git-release.sh create major # create next major release based on current version
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        1.0.0
+        user@host ~ $ git-release.sh previous # show the last version (one before the last released) if exists
+        0.0.0
+        user@host ~ $ git-release.sh create # create next minor (implicit) release based on current version
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        1.1.0
+        user@host ~ $ git-release.sh create minor # create next minor (explicit) release based on current version
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        1.2.0
+        user@host ~ $ git-release.sh create patch # create next patch release based on current version
+        ...
+        user@host ~ $ git-release.sh version # show the current version (last released) if exists
+        1.2.1
+        user@host ~ $ git-release.sh version 5 # show the 5 versions last released versions if exist
+        0.0.0
+        1.0.0
+        1.1.0
+        1.2.0
+        1.2.1
+        user@host ~ $ git-release.sh prepare # updates branches 'master' and 'develop' (with 'git pull')
+        ...
+        user@host ~ $ git-release.sh send # push change on master and develop to origin remote
+        ...
+
+
+        user@host ~ $ git-release.sh deploy patch # shortcut to run 'prepare', then 'issues', then 'create patch'
+        ...
+        user@host ~ $ git-release.sh deploy --send # shortcut to run 'prepare', then 'issues', then 'create minor', then 'send'
+        ...
+        user@host ~ $ git-release.sh deploy major --send # shortcut to run 'prepare', then 'issues', then 'create major', then 'send'
+        ...
+
+    Syntax:
+
+        git-release.sh <command>
 
     Commands:
       help: show this message.
@@ -41,7 +102,14 @@ function _help () {
           kind|version: options are the same as those for 'create'. Actually, it'll simple bypass for 'create' command.
           --send: use this flag to execute 'send' command after all to push thing to remote.
 
-      send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'."
+      send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'.
+
+
+    Others:
+
+        - Run inside your repository
+        - It depends on git flow initiated
+        - Becareful with '--send'"
 }
 
 function previous () {
@@ -54,6 +122,10 @@ function next () {
 	# Generate next release version number
 	VERSION=`version`
 	KIND=${1:-minor}
+    if [ -z "$VERSION"  ]; then
+        echo 0.0.0
+        return 0
+    fi
 
 	# major, minor, patch
 	IFS='.' read -r -a splitVersion <<< "$VERSION"
@@ -145,8 +217,14 @@ function send () {
 function deploy() {
     prepare
     issues
-    create $1
-    if [ "$2" == "--send" ]; then
+	VERSION=${1:-minor}
+	SEND=$2
+    if [ "$1" == "--send" ]; then
+        VERSION="minor"
+        SEND="--send"
+    fi
+    create $VERSION
+    if [ "$SEND" == "--send" ]; then
         send
     fi
 }
