@@ -1,0 +1,8 @@
+- Better git integration
+- Better shell integration
+- Improve (a lot) the command interface (parameters and flags, etc)
+- Make it configurable (environment variables, git config, repository hooks)
+- Handle in a better way 'erros'
+- Add generic options like verbose, output redirection, etc
+- Make 'deploy' command interactive (cli wizard like)
+- Break release (deploy and create command) on two stages, so user can use the release branch created

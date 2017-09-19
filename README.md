@@ -1,2 +1,2 @@
 # git-release
-Simple utility to create release based on git and git-flow.
+Simple utility to deal with releases based on git and git-flow.
