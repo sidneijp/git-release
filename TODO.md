@@ -6,3 +6,5 @@
 - Add generic options like verbose, output redirection, etc
 - Make 'deploy' command interactive (cli wizard like)
 - Break release (deploy and create command) on two stages, so user can use the release branch created
+- Cover with automated tests
+- Create 'abort' command to clean release in case of conflicts or errors in the process that let the repository in indeterminate state
