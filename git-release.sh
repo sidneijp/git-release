@@ -113,51 +113,51 @@ function _help () {
 }
 
 function previous () {
-	BACKWARD=${1:-1}
-	let BACKWARD="$BACKWARD"+1
-	echo `version "$BACKWARD" | tail -n 1`
+  BACKWARD=${1:-1}
+  let BACKWARD="$BACKWARD"+1
+  echo `version "$BACKWARD" | tail -n 1`
 }
 
 function next () {
-	# Generate next release version number
-	VERSION=`version`
-	KIND=${1:-minor}
+  # Generate next release version number
+  VERSION=`version`
+  KIND=${1:-minor}
     if [ -z "$VERSION"  ]; then
         echo 0.0.0
         return 0
     fi
 
-	# major, minor, patch
-	IFS='.' read -r -a splitVersion <<< "$VERSION"
-	version_length=${#splitVersion[@]} # array length
+  # major, minor, patch
+  IFS='.' read -r -a splitVersion <<< "$VERSION"
+  version_length=${#splitVersion[@]} # array length
 
-	if [ "$KIND" == "patch" ]; then
-		if [ "$version_length" == 3 ]; then
-			new_version="${splitVersion[0]}""."
-			new_version="$new_version""${splitVersion[1]}""."
-			v=${splitVersion[2]}
-			let v="$v"+1
-			new_version="$new_version""$v"
-		else
-			new_version="${splitVersion[0]}""."
-			new_version="$new_version""${splitVersion[1]}""."
-			new_version="$new_version""1"
-		fi
-	elif [ "$KIND" == "minor" ]; then
-		new_version="${splitVersion[0]}""."
-		v="${splitVersion[1]}"
-		let v="$v"+1
-		new_version="$new_version""$v""."
-		new_version="$new_version""0"
-	elif [ "$KIND" == "major" ]; then
-		v="${splitVersion[0]}"
-		let v="$v"+1
-		new_version="$v""."
-		new_version="$new_version""0""."
-		new_version="$new_version""0"
-	fi
+  if [ "$KIND" == "patch" ]; then
+    if [ "$version_length" == 3 ]; then
+      new_version="${splitVersion[0]}""."
+      new_version="$new_version""${splitVersion[1]}""."
+      v=${splitVersion[2]}
+      let v="$v"+1
+      new_version="$new_version""$v"
+    else
+      new_version="${splitVersion[0]}""."
+      new_version="$new_version""${splitVersion[1]}""."
+      new_version="$new_version""1"
+    fi
+  elif [ "$KIND" == "minor" ]; then
+    new_version="${splitVersion[0]}""."
+    v="${splitVersion[1]}"
+    let v="$v"+1
+    new_version="$new_version""$v""."
+    new_version="$new_version""0"
+  elif [ "$KIND" == "major" ]; then
+    v="${splitVersion[0]}"
+    let v="$v"+1
+    new_version="$v""."
+    new_version="$new_version""0""."
+    new_version="$new_version""0"
+  fi
 
-	echo $new_version
+  echo $new_version
 }
 
 function issues () {
@@ -166,64 +166,78 @@ function issues () {
   POINT_B=${2:-$TAG}
 
   if [ "$POINT_A" == "previous" ]; then
-  	BACKWARD=${2:-0}
-  	POINT_A=`previous "$BACKWARD"`
-  	let BACKWARD="$BACKWARD"+1
-  	POINT_B=`previous "$BACKWARD"`
+    BACKWARD=${2:-0}
+    POINT_A=`previous "$BACKWARD"`
+    let BACKWARD="$BACKWARD"+1
+    POINT_B=`previous "$BACKWARD"`
   fi
   echo $POINT_A/$POINT_B
   echo
 
-  git log $POINT_B..$POINT_A --format=oneline | grep -Eio "tkt[-_]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
+  git log "$POINT_B".."$POINT_A" --format=oneline | grep -Eio "tkt[-_]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
 
 function version () {
-	AMOUNT=${1:-1}
-	git log | less | grep -Eo "tag\: [0-9]+\.[0-9]+(\.[0-9]+)?" | head -n $AMOUNT | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?"
+  AMOUNT=${1:-1}
+  git log | less | grep -Eo "tag\: [0-9]+\.[0-9]+(\.[0-9]+)?" | head -n "$AMOUNT" | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?"
 }
 
 function prepare () {
-	MASTER=master
-	DEVELOP=develop
-	REMOTE=origin
+  MASTER=master
+  DEVELOP=develop
+  REMOTE=origin
 
-	# Atualiza branches
-	git checkout $MASTER && git pull $REMOTE $MASTER
-	git checkout $DEVELOP && git pull $REMOTE $DEVELOP
+  # Atualiza branches
+  git checkout "$MASTER" && git pull "$REMOTE" "$MASTER"
+  git checkout "$DEVELOP" && git pull "$REMOTE" "$DEVELOP"
+    git pull "$REMOTE" --tags
 }
 
 function create () {
-	VERSION=${1:-minor}
+  VERSION=${1:-minor}
 
-	if [ "$VERSION" == "patch" ] || [ "$VERSION" == "minor" ] || [ "$VERSION" == "major" ]; then
-		VERSION=`next "$1"`
-	fi
+  if [ "$VERSION" == "patch" ] || [ "$VERSION" == "minor" ] || [ "$VERSION" == "major" ]; then
+    VERSION=`next "$1"`
+  fi
 
-	echo "Create release version:" $VERSION
-	git flow release start $VERSION
-	git flow release finish $VERSION
+  echo "Create release version:" "$VERSION"
+  git flow release start "$VERSION"
+  git flow release finish "$VERSION"
+}
+
+function revert () {
+    MASTER=master
+    DEVELOP=develop
+    REMOTE=origin
+    VERSION=`version`
+
+    git checkout "$DEVELOP" && git reset --hard origin/HEAD
+    git checkout "$MASTER" && git reset --hard origin/HEAD
+    git branch -D "release/$VERSION"
+    git tag -d "$VERSION"
+    prepare
 }
 
 function send () {
-	MASTER=master
-	DEVELOP=develop
-	REMOTE=origin
+  MASTER=master
+  DEVELOP=develop
+  REMOTE=origin
 
-	git checkout $DEVELOP && git pull $REMOTE $DEVELOP && git push $REMOTE $DEVELOP
-	git checkout $MASTER && git pull $REMOTE $MASTER && git push $REMOTE --tags && git push $REMOTE $MASTER
-	git checkout $DEVELOP
+  git checkout "$DEVELOP" && git pull "$REMOTE" "$DEVELOP" && git push "$REMOTE" "$DEVELOP"
+  git checkout "$MASTER" && git pull "$REMOTE" "$MASTER" && git push "$REMOTE" "$MASTER" && git push "$REMOTE" --tags
+  git checkout "$DEVELOP"
 }
 
 function deploy() {
     prepare
     issues
-	VERSION=${1:-minor}
-	SEND=$2
+  VERSION=${1:-minor}
+  SEND=$2
     if [ "$1" == "--send" ]; then
         VERSION="minor"
         SEND="--send"
     fi
-    create $VERSION
+    create "$VERSION"
     if [ "$SEND" == "--send" ]; then
         send
     fi
