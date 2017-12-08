@@ -194,7 +194,8 @@ function prepare () {
 
   git checkout "$MASTER" && git pull "$REMOTE" "$MASTER"
   git checkout "$DEVELOP" && git pull "$REMOTE" "$DEVELOP"
-  git pull "$REMOTE" --tags
+  git fetch --tags
+  git fetch
 }
 
 function create () {
