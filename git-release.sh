@@ -74,10 +74,10 @@ function _help () {
     Commands:
       help: show this message.
 
-      prepare: show this message.
+      prepare: update branch develop and master.
 
       version [amount]: show released versions.
-              amount (defaults to:1): the number of previous version to show.
+              amount (defaults to 1): the number of previous version to show.
 
       previous : show previous release version.
 
@@ -93,7 +93,7 @@ function _help () {
               with its default value.
 
       issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,
-              and good practices/conventions. For now it's hardcoded to find string started with 'tkt[-_]?[0-9]+', but it will configurable. It uses
+              and good practices/conventions. For now it's hardcoded to find string started with 'tkt[-_/]?[0-9]+', but it will configurable. It uses
               two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag.
           point_a (defaults to branch 'develop'): point of the search range.
           point_b (defaults to the output of 'version' command): point of the search range.
@@ -104,12 +104,22 @@ function _help () {
 
       send: push branches develop and master and git tags to remote repository. Not yet configurable, the remote is 'origin'.
 
+      revert: revert the fresh release. Only work with the release was not send to remote.
+        WARNING: if changes made on the local repository was not pushed to the remote BEFORE the release creation, those change will be lost.
+
 
     Others:
 
         - Run inside your repository
-        - It depends on git flow initiated
-        - Becareful with '--send'"
+        - It depends on git flow initiated on local repository (git flow init)
+        - Becareful with '--send'
+        - Becareful with 'revert'"
+}
+
+
+function version () {
+  AMOUNT=${1:-1}
+  git log | less | grep -Eo "tag\: [0-9]+\.[0-9]+(\.[0-9]+)?" | head -n "$AMOUNT" | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?"
 }
 
 function previous () {
@@ -122,10 +132,10 @@ function next () {
   # Generate next release version number
   VERSION=`version`
   KIND=${1:-minor}
-    if [ -z "$VERSION"  ]; then
-        echo 0.0.0
-        return 0
-    fi
+  if [ -z "$VERSION"  ]; then
+    echo 0.0.0
+    return 0
+  fi
 
   # major, minor, patch
   IFS='.' read -r -a splitVersion <<< "$VERSION"
@@ -174,12 +184,7 @@ function issues () {
   echo $POINT_A/$POINT_B
   echo
 
-  git log "$POINT_B".."$POINT_A" --format=oneline | grep -Eio "tkt[-_]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
-}
-
-function version () {
-  AMOUNT=${1:-1}
-  git log | less | grep -Eo "tag\: [0-9]+\.[0-9]+(\.[0-9]+)?" | head -n "$AMOUNT" | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?"
+  git log "$POINT_B".."$POINT_A" --pretty=format:"%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset" | grep -Eio "tkt[-_/]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
 
 function prepare () {
@@ -187,10 +192,10 @@ function prepare () {
   DEVELOP=develop
   REMOTE=origin
 
-  # Atualiza branches
   git checkout "$MASTER" && git pull "$REMOTE" "$MASTER"
   git checkout "$DEVELOP" && git pull "$REMOTE" "$DEVELOP"
-    git pull "$REMOTE" --tags
+  git fetch --tags
+  git fetch
 }
 
 function create () {
@@ -206,16 +211,16 @@ function create () {
 }
 
 function revert () {
-    MASTER=master
-    DEVELOP=develop
-    REMOTE=origin
-    VERSION=`version`
+  MASTER=master
+  DEVELOP=develop
+  REMOTE=origin
+  VERSION=`version`
 
-    git checkout "$DEVELOP" && git reset --hard origin/HEAD
-    git checkout "$MASTER" && git reset --hard origin/HEAD
-    git branch -D "release/$VERSION"
-    git tag -d "$VERSION"
-    prepare
+  git checkout "$DEVELOP" && git reset --hard origin/HEAD
+  git checkout "$MASTER" && git reset --hard origin/HEAD
+  git branch -D "release/$VERSION"
+  git tag -d "$VERSION"
+  prepare
 }
 
 function send () {
@@ -229,24 +234,24 @@ function send () {
 }
 
 function deploy() {
-    prepare
-    issues
+  prepare
+  issues
   VERSION=${1:-minor}
   SEND=$2
-    if [ "$1" == "--send" ]; then
-        VERSION="minor"
-        SEND="--send"
-    fi
-    create "$VERSION"
-    if [ "$SEND" == "--send" ]; then
-        send
-    fi
+  if [ "$1" == "--send" ]; then
+      VERSION="minor"
+      SEND="--send"
+  fi
+  create "$VERSION"
+  if [ "$SEND" == "--send" ]; then
+      send
+  fi
 }
 
 # Execute command + parameters
 COMMAND=${1:-help}
 if [ "$COMMAND" == "help" ]; then
-    COMMAND="_help"
+  COMMAND="_help"
 fi
 
 $COMMAND $2 $3

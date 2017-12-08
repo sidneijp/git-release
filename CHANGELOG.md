@@ -2,7 +2,7 @@
 
 ## Versão 0.0.0
 
-Release first usebla and tested version
+Release first usable and tested version
 
     - Versioning based on Semantic Versioning(major.minor.patch)
     - calculate version number
