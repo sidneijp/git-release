@@ -93,7 +93,7 @@ function _help () {
               with its default value.
 
       issues [point_a] [point_b]: list the issues that the commits are supposed to solve. It depends on branch's names, commit's headline messages,
-              and good practices/conventions. For now it's hardcoded to find string started with 'tkt[-_]?[0-9]+', but it will configurable. It uses
+              and good practices/conventions. For now it's hardcoded to find string started with 'tkt[-_/]?[0-9]+', but it will configurable. It uses
               two points to determine a range to find the issues, the order doens't matter. Those points can be a commit's hash, branch, or tag.
           point_a (defaults to branch 'develop'): point of the search range.
           point_b (defaults to the output of 'version' command): point of the search range.
@@ -184,7 +184,7 @@ function issues () {
   echo $POINT_A/$POINT_B
   echo
 
-  git log "$POINT_B".."$POINT_A" --format=oneline | grep -Eio "tkt[-_]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
+  git log "$POINT_B".."$POINT_A" --pretty=format:"%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset" | grep -Eio "tkt[-_/]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
 
 function prepare () {
