@@ -187,6 +187,10 @@ function issues () {
   git log "$POINT_B".."$POINT_A" --pretty=format:"%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset" | grep -Eio "tkt[-_/]?[0-9]+" | tr '[:upper:]' '[:lower:]' | sort | uniq
 }
 
+function contributors () {
+  git log --pretty=format:"%ae" | tr '[:upper:]' '[:lower:]' | sort | uniq
+}
+
 function prepare () {
   MASTER=master
   DEVELOP=develop
