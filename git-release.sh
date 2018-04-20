@@ -119,7 +119,7 @@ function _help () {
 
 function version () {
   AMOUNT=${1:-1}
-  git log | less | grep -Eo "tag\: [0-9]+\.[0-9]+(\.[0-9]+)?" | head -n "$AMOUNT" | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?"
+  git log --pretty=format:"%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset" | less | grep -Eo "((release/)|(tag: ))[0-9]+\.[0-9]+(\.[0-9]+)?" | grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)?" | uniq | head -n "$AMOUNT"
 }
 
 function previous () {
